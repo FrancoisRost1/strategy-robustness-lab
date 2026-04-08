@@ -123,7 +123,7 @@ def render():
         )
 
     # Run button
-    st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 1rem'></div>")
 
     if st.button("Run Analysis", type="primary", use_container_width=True):
         _run_analysis(mode, config, metric, n_partitions, n_resamples, lookback)

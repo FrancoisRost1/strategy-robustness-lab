@@ -40,19 +40,17 @@ def main():
 
     # Sidebar
     with st.sidebar:
-        st.markdown(
-            f"<h2 style='color: {TOKENS['accent_primary']}; "
-            f"font-family: {TOKENS['font_display']}; font-weight: 700;'>"
-            f"◆ Robustness Lab</h2>",
-            unsafe_allow_html=True,
+        st.html(
+            f'<h2 style="color: {TOKENS["accent_primary"]}; '
+            f'font-family: {TOKENS["font_display"]}; font-weight: 700;">'
+            f'◆ Robustness Lab</h2>'
         )
         styled_section_label("About")
-        st.markdown(
-            f"<span style='font-size: 0.85rem; color: {TOKENS['text_secondary']};'>"
+        st.html(
+            f'<span style="font-size: 0.85rem; color: {TOKENS["text_secondary"]};">'
             "Strategy overfitting detection via CSCV, PBO, and deflated Sharpe ratio. "
-            "Bailey, Borwein, López de Prado & Zhu (2014)."
-            "</span>",
-            unsafe_allow_html=True,
+            "Bailey, Borwein, L\u00f3pez de Prado & Zhu (2014)."
+            "</span>"
         )
         styled_divider()
         styled_section_label("Status")
@@ -65,15 +63,13 @@ def main():
                 "GRAY": TOKENS["text_muted"],
             }
             c = color_map.get(v["color"], TOKENS["text_secondary"])
-            st.markdown(
-                f"<span style='color: {c}; font-weight: 700; font-size: 1.1rem;'>"
-                f"● {v['verdict']}</span>",
-                unsafe_allow_html=True,
+            st.html(
+                f'<span style="color: {c}; font-weight: 700; font-size: 1.1rem;">'
+                f"● {v['verdict']}</span>"
             )
         else:
-            st.markdown(
-                f"<span style='color: {TOKENS['text_muted']};'>No analysis run yet</span>",
-                unsafe_allow_html=True,
+            st.html(
+                f'<span style="color: {TOKENS["text_muted"]};">No analysis run yet</span>'
             )
 
     # Generate demo data on first load
@@ -114,13 +110,12 @@ def main():
         render_explorer()
 
     # Footer
-    st.markdown(
-        f"<div style='text-align: center; color: {TOKENS['text_muted']}; "
-        f"font-size: 0.75rem; margin-top: 3rem;'>"
-        "Strategy Robustness Lab · Bailey, Borwein, López de Prado & Zhu (2014) · "
+    st.html(
+        f'<div style="text-align: center; color: {TOKENS["text_muted"]}; '
+        f'font-size: 0.75rem; margin-top: 3rem;">'
+        "Strategy Robustness Lab \u00b7 Bailey, Borwein, L\u00f3pez de Prado & Zhu (2014) \u00b7 "
         "Built with Streamlit"
-        "</div>",
-        unsafe_allow_html=True,
+        "</div>"
     )
 
 

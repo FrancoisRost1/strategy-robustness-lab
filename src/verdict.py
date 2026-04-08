@@ -76,10 +76,9 @@ def classify(
             "verdict": "ROBUST",
             "color": "GREEN",
             "details": (
-                f"PBO {pbo:.2f} < {robust_pbo}, "
-                f"DSR {dsr:.2f} >= {robust_dsr}, "
-                f"plateau {plat:.2f} > {robust_plat}. "
-                "Strategy passes all robustness checks."
+                f"PBO {pbo:.2f} — low overfitting risk\n"
+                f"DSR {dsr:.2f} — statistically significant after multiple-testing\n"
+                f"Plateau {plat:.2f} — robust to parameter choice"
             ),
             "scores": scores,
         }
@@ -90,10 +89,9 @@ def classify(
             "verdict": "OVERFIT",
             "color": "RED",
             "details": (
-                f"PBO {pbo:.2f} > {overfit_pbo}, "
-                f"DSR {dsr:.2f} < {overfit_dsr}, "
-                f"plateau {plat:.2f} < {overfit_plat}. "
-                "Strategy fails all robustness checks — likely overfit."
+                f"PBO {pbo:.2f} — {'extremely high, strong evidence of overfitting' if pbo > 0.75 else 'above threshold, likely overfit'}\n"
+                f"DSR {dsr:.2f} — {'not significant, performance likely due to noise' if dsr < 0.95 else 'significant'}\n"
+                f"Plateau {plat:.2f} — {'very low, fragile parameter sensitivity' if plat < 0.10 else 'below threshold'}"
             ),
             "scores": scores,
         }
@@ -104,9 +102,9 @@ def classify(
             "verdict": "LIKELY ROBUST",
             "color": "GREEN",
             "details": (
-                f"PBO {pbo:.2f} < {green_thresh} (green zone), "
-                f"but not all supporting metrics pass "
-                f"(DSR={dsr:.2f}, plateau={plat:.2f})."
+                f"PBO {pbo:.2f} — low overfitting risk\n"
+                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant'}\n"
+                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
             ),
             "scores": scores,
         }
@@ -116,8 +114,9 @@ def classify(
             "verdict": "BORDERLINE",
             "color": "YELLOW",
             "details": (
-                f"PBO {pbo:.2f} in [{green_thresh}, {yellow_thresh}] range. "
-                "Strategy may be partially overfit — exercise caution."
+                f"PBO {pbo:.2f} — borderline overfitting risk\n"
+                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant'}\n"
+                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
             ),
             "scores": scores,
         }
@@ -128,9 +127,9 @@ def classify(
             "verdict": "LIKELY OVERFIT",
             "color": "RED",
             "details": (
-                f"PBO {pbo:.2f} > 0.90. Catastrophic overfitting — "
-                "strategy selection is essentially random. "
-                "In-sample best has no reliable OOS advantage."
+                f"PBO {pbo:.2f} — catastrophic, likely noise\n"
+                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
+                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
             ),
             "scores": scores,
         }
@@ -140,8 +139,9 @@ def classify(
         "verdict": "LIKELY OVERFIT",
         "color": "RED",
         "details": (
-            f"PBO {pbo:.2f} > {yellow_thresh}. "
-            "In-sample best strategy likely underperforms OOS."
+            f"PBO {pbo:.2f} — high overfitting risk\n"
+            f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
+            f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
         ),
         "scores": scores,
     }

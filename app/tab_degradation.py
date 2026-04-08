@@ -34,6 +34,28 @@ def render():
         styled_card("Degradation data not available.", accent_color=TOKENS["accent_warning"])
         return
 
+    # Check if degradation analysis is meaningful
+    n_unprofitable = degrad.get("n_unprofitable_is", 0)
+    n_total = len(degrad.get("is_metrics", []))
+    unprofitable_pct = n_unprofitable / n_total if n_total > 0 else 0
+
+    if unprofitable_pct > 0.7:
+        styled_card(
+            "Degradation analysis unavailable — insufficient profitable in-sample strategies "
+            f"for meaningful comparison ({n_unprofitable}/{n_total} combinations had non-positive IS metric).",
+            accent_color=TOKENS["accent_warning"],
+        )
+        # Still show bootstrap if available
+        boot = r.get("bootstrap")
+        if boot:
+            styled_section_label("Bootstrapped Metric Distributions")
+            col3, col4 = st.columns(2)
+            with col3:
+                _plot_bootstrap(boot["standard"], "Standard Bootstrap")
+            with col4:
+                _plot_bootstrap(boot["block"], "Block Bootstrap")
+        return
+
     # KPI row
     cols = st.columns(4)
     with cols[0]:
@@ -63,7 +85,7 @@ def render():
     with cols[3]:
         styled_kpi("Std Degradation", f"{degrad['std_degradation']:.2f}")
 
-    st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 1.5rem'></div>")
 
     # Row 1: IS vs OOS scatter + degradation histogram
     col1, col2 = st.columns(2)
@@ -108,7 +130,7 @@ def render():
                 ))
 
         fig.update_layout(
-            title="IS Sharpe vs OOS Sharpe (45° = no degradation)",
+            title="IS vs OOS Ranking Metric (45° = no degradation)",
             xaxis_title="IS Metric",
             yaxis_title="OOS Metric",
             height=380,
@@ -157,9 +179,25 @@ def render():
         with col4:
             _plot_bootstrap(boot["block"], "Block Bootstrap")
 
+    # Bootstrap CI interpretation
+    if boot:
+        std_boot = boot.get("standard", {})
+        blk_boot = boot.get("block", {})
+        ci_lo_std = std_boot.get("ci_lower", 0)
+        ci_hi_std = std_boot.get("ci_upper", 0)
+        ci_lo_blk = blk_boot.get("ci_lower", 0)
+        ci_hi_blk = blk_boot.get("ci_upper", 0)
+
+        if (ci_lo_std < 0 < ci_hi_std) or (ci_lo_blk < 0 < ci_hi_blk):
+            styled_card(
+                "Confidence interval spans zero — strategy performance is not statistically "
+                "distinguishable from zero return.",
+                accent_color=TOKENS["accent_warning"],
+            )
+
     # Haircut text
     if r.get("haircut"):
-        st.markdown("<div style='height: 1rem'></div>", unsafe_allow_html=True)
+        st.html("<div style='height: 1rem'></div>")
         styled_card(r["haircut"], accent_color=TOKENS["accent_info"])
 
 

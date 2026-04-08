@@ -502,7 +502,7 @@ def styled_header(title: str, subtitle: str = ""):
         {"<p style='font-size: 1rem; color: " + TOKENS["text_secondary"] + "; margin-top: 0.35rem; font-family: " + TOKENS["font_body"] + ";'>" + subtitle + "</p>" if subtitle else ""}
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.html(html)
 
 
 def styled_card(content: str, accent_color: str = None):
@@ -528,7 +528,7 @@ def styled_card(content: str, accent_color: str = None):
         </span>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.html(html)
 
 
 def styled_kpi(label: str, value: str, delta: str = "", delta_color: str = ""):
@@ -577,15 +577,12 @@ def styled_kpi(label: str, value: str, delta: str = "", delta_color: str = ""):
         </div>
     </div>
     """
-    st.markdown(kpi_html, unsafe_allow_html=True)
+    st.html(kpi_html)
 
 
 def styled_divider():
     """Renders a subtle horizontal divider."""
-    st.markdown(
-        f'<hr style="border: none; border-top: 1px solid {TOKENS["border_subtle"]}; margin: 1.5rem 0;">',
-        unsafe_allow_html=True
-    )
+    st.html(f'<hr style="border: none; border-top: 1px solid {TOKENS["border_subtle"]}; margin: 1.5rem 0;">')
 
 
 def styled_section_label(text: str):
@@ -607,7 +604,7 @@ def styled_section_label(text: str):
         margin-top: 1rem;
     ">{text}</div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.html(html)
 
 
 # ─────────────────────────────────────────────

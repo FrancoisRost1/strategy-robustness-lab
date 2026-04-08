@@ -64,7 +64,7 @@ def render():
     with cols[3]:
         styled_kpi("Cells in Plateau", f"{plateau['n_plateau_cells']} / {plateau['n_total_cells']}")
 
-    st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 1.5rem'></div>")
 
     config = r.get("config", {})
     tolerance = config.get("parameter_stability", {}).get("plateau_tolerance", 0.10)

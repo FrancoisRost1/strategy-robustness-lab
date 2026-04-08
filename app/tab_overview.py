@@ -70,7 +70,7 @@ def render():
                 max-width: 600px;
                 margin-left: auto;
                 margin-right: auto;
-            ">{v['details']}</div>
+            ">{v['details'].replace(chr(10), '<br>')}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -81,8 +81,8 @@ def render():
     all_negative = all(v < 0 for v in trial_metrics.values() if not np.isnan(v))
     if all_negative and trial_metrics:
         styled_card(
-            "All strategies have negative Sharpe ratios — none are profitable. "
-            "Robustness analysis shows relative ranking only and may not be meaningful.",
+            "All strategies are unprofitable. Robustness analysis is limited to relative "
+            "ranking and should not be interpreted as evidence of a viable strategy.",
             accent_color=TOKENS["accent_danger"],
         )
 
@@ -133,7 +133,7 @@ def render():
                     delta_color=plat_color)
         st.caption("Fraction of parameter grid near optimal performance")
 
-    st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 1.5rem'></div>")
 
     # --- Summary table ---
     styled_section_label("Diagnostic Summary")
@@ -211,7 +211,7 @@ def _pbo_label(pbo):
     if pbo <= 0.50:
         return "Borderline"
     if pbo > 0.90:
-        return "Catastrophic — selection is random"
+        return "Catastrophic — likely driven by noise rather than persistent signal"
     return "High overfitting risk"
 
 

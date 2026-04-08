@@ -161,7 +161,7 @@ def render():
             ))
 
         fig.update_layout(
-            title="IS vs OOS Metric Across CSCV Combinations",
+            title="IS Metric vs OOS Metric (CSCV Combinations)",
             xaxis_title="IS Metric (best trial)",
             yaxis_title="OOS Metric (same trial)",
             height=380,

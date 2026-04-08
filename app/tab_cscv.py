@@ -50,6 +50,7 @@ def render():
             opacity=0.85,
         ))
         fig.update_layout(
+            title="OOS Rank Distribution of IS-Best Trial",
             xaxis_title="OOS Rank (1=best)",
             yaxis_title="Count",
             height=380,
@@ -84,6 +85,7 @@ def render():
             annotation_position="top left",
         )
         fig.update_layout(
+            title=f"Logit Distribution (PBO = {pbo['pbo']:.3f})",
             xaxis_title="Logit(relative rank)",
             yaxis_title="Count",
             height=380,
@@ -97,6 +99,10 @@ def render():
     with col3:
         styled_section_label("PBO Convergence")
         if pbo_conv is not None and len(pbo_conv) > 0:
+            # Ensure first point is included for a proper curve
+            if pbo_conv.iloc[0]["n_evaluated"] > 1:
+                first_row = pd.DataFrame([{"n_evaluated": 1, "pbo_estimate": pbo_conv.iloc[0]["pbo_estimate"]}])
+                pbo_conv = pd.concat([first_row, pbo_conv], ignore_index=True)
             fig = go.Figure()
             fig.add_trace(go.Scatter(
                 x=pbo_conv["n_evaluated"],
@@ -112,6 +118,7 @@ def render():
                 annotation_text="50% threshold",
             )
             fig.update_layout(
+                title="PBO Convergence (stabilisation check)",
                 xaxis_title="Combinations Evaluated",
                 yaxis_title="PBO Estimate",
                 yaxis_range=[0, 1],
@@ -154,6 +161,7 @@ def render():
             ))
 
         fig.update_layout(
+            title="IS vs OOS Metric Across CSCV Combinations",
             xaxis_title="IS Metric (best trial)",
             yaxis_title="OOS Metric (same trial)",
             height=380,

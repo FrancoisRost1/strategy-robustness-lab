@@ -48,11 +48,11 @@ def render():
             if k != "trial_id":
                 row[k] = v
 
-        row["Sharpe"] = round(m.get("sharpe", np.nan), 4)
-        row["Sortino"] = round(m.get("sortino", np.nan), 4)
-        row["Calmar"] = round(m.get("calmar", np.nan), 4)
-        row["CAGR"] = f"{m.get('cagr', np.nan):.2%}" if not np.isnan(m.get("cagr", np.nan)) else "N/A"
-        row["Max DD"] = f"{m.get('max_drawdown', np.nan):.2%}" if not np.isnan(m.get("max_drawdown", np.nan)) else "N/A"
+        row["Sharpe"] = round(m.get("sharpe", np.nan), 2)
+        row["Sortino"] = round(m.get("sortino", np.nan), 2)
+        row["Calmar"] = round(m.get("calmar", np.nan), 2)
+        row["CAGR"] = f"{m.get('cagr', np.nan):.1%}" if not np.isnan(m.get("cagr", np.nan)) else "N/A"
+        row["Max DD"] = f"{m.get('max_drawdown', np.nan):.1%}" if not np.isnan(m.get("max_drawdown", np.nan)) else "N/A"
         row["IS-Best"] = "★" if trial_id == is_best else ""
         rows.append(row)
 
@@ -112,19 +112,21 @@ def render():
         for i, trial_id in enumerate(selected):
             equity = (1 + trial_matrix[trial_id]).cumprod()
             color = colorway[i % len(colorway)]
+            opacity = 1.0 if trial_id == is_best else 0.2
             width = 2.5 if trial_id == is_best else 1.5
-            dash = None if trial_id == is_best else "dot"
             name = f"Trial {trial_id}" + (" (IS-Best)" if trial_id == is_best else "")
 
             fig.add_trace(go.Scatter(
                 x=equity.index,
                 y=equity.values,
                 mode="lines",
-                line=dict(color=color, width=width, dash=dash),
+                line=dict(color=color, width=width),
+                opacity=opacity,
                 name=name,
             ))
 
         fig.update_layout(
+            title="Equity Curves — Selected Trials",
             xaxis_title="Date",
             yaxis_title="Cumulative Return (growth of $1)",
             height=420,

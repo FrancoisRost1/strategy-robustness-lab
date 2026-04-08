@@ -31,12 +31,13 @@ def render():
 
     # --- Traffic light verdict ---
     color_map = {
-        "GREEN": TOKENS["accent_success"],
-        "YELLOW": TOKENS["accent_warning"],
-        "RED": TOKENS["accent_danger"],
+        "GREEN": "#00CC66",
+        "YELLOW": "#FFAA00",
+        "RED": "#FF4444",
+        "GRAY": TOKENS["text_muted"],
     }
     emoji_map = {"GREEN": "●", "YELLOW": "●", "RED": "●"}
-    verdict_color = color_map.get(v["color"], TOKENS["text_secondary"])
+    verdict_color = color_map.get(v["color"], TOKENS["text_muted"])
 
     st.markdown(
         f"""
@@ -75,6 +76,16 @@ def render():
         unsafe_allow_html=True,
     )
 
+    # --- All-negative warning ---
+    trial_metrics = r.get("trial_metrics", {})
+    all_negative = all(v < 0 for v in trial_metrics.values() if not np.isnan(v))
+    if all_negative and trial_metrics:
+        styled_card(
+            "All strategies have negative Sharpe ratios — none are profitable. "
+            "Robustness analysis shows relative ranking only and may not be meaningful.",
+            accent_color=TOKENS["accent_danger"],
+        )
+
     # --- KPI row ---
     pbo_val = r["pbo"]["pbo"] if r.get("pbo") else np.nan
     degrad_mean = r["degradation"]["mean_degradation"] if r.get("degradation") else np.nan
@@ -83,11 +94,14 @@ def render():
     sd_dominates = sd_result.get("strategy_dominates", False)
     sd_rejects = sd_result.get("rejects_null", False)
     if sd_dominates and sd_rejects:
-        sd_text = "Dominates"
+        sd_text = "IS-best dominates"
+        sd_delta = "Consistent OOS edge"
     elif sd_rejects:
-        sd_text = "Differs (no dominance)"
+        sd_text = "Differs"
+        sd_delta = "No stochastic dominance — no reliable OOS advantage"
     else:
-        sd_text = "No"
+        sd_text = "No difference"
+        sd_delta = "Cannot distinguish IS-best from average strategy"
     plateau_frac = r["parameter_stability"]["plateau_fraction"] if r.get("parameter_stability") else np.nan
 
     cols = st.columns(5)
@@ -95,21 +109,29 @@ def render():
         pbo_color = _pbo_color(pbo_val)
         styled_kpi("PBO Score", f"{pbo_val:.3f}" if not np.isnan(pbo_val) else "N/A",
                     delta=_pbo_label(pbo_val), delta_color=pbo_color)
+        st.caption("Probability the IS-best strategy underperforms OOS")
     with cols[1]:
         styled_kpi("Mean Degradation", f"{degrad_mean:.2f}" if not np.isnan(degrad_mean) else "N/A")
+        st.caption("Average OOS/IS performance ratio across CSCV splits")
     with cols[2]:
         dsr_color = TOKENS["accent_success"] if dsr_val >= 0.95 else TOKENS["accent_danger"]
+        n_trials = r.get("trial_matrix", pd.DataFrame()).shape[1]
+        dsr_delta = "Significant" if dsr_val >= 0.95 else f"Not significant (tested {n_trials} strategies)"
         styled_kpi("Deflated Sharpe", f"{dsr_val:.3f}" if not np.isnan(dsr_val) else "N/A",
-                    delta="Significant" if dsr_val >= 0.95 else "Not significant",
+                    delta=dsr_delta,
                     delta_color=dsr_color)
+        st.caption("Sharpe significance after multiple-testing correction")
     with cols[3]:
         styled_kpi("Stochastic Dominance", sd_text,
-                    delta=f"p={sd_result.get('p_value', np.nan):.3f}" if sd_result.get("p_value") is not None else "")
+                    delta=sd_delta,
+                    delta_color=TOKENS["accent_success"] if sd_dominates and sd_rejects else TOKENS["text_secondary"])
+        st.caption("Whether IS-best OOS returns dominate the benchmark")
     with cols[4]:
         plat_color = TOKENS["accent_success"] if not np.isnan(plateau_frac) and plateau_frac > 0.30 else TOKENS["accent_warning"]
         styled_kpi("Plateau Fraction", f"{plateau_frac:.2f}" if not np.isnan(plateau_frac) else "N/A",
                     delta=r["parameter_stability"]["classification"] if r.get("parameter_stability") else "",
                     delta_color=plat_color)
+        st.caption("Fraction of parameter grid near optimal performance")
 
     st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
@@ -129,21 +151,21 @@ def render():
             "Bootstrap Sharpe 95% CI (Block)",
         ],
         "Value": [
-            f"{pbo_val:.4f}" if not np.isnan(pbo_val) else "N/A",
-            f"{dsr_val:.4f}" if not np.isnan(dsr_val) else "N/A",
-            f"{degrad_mean:.4f}" if not np.isnan(degrad_mean) else "N/A",
+            f"{pbo_val:.3f}" if not np.isnan(pbo_val) else "N/A",
+            f"{dsr_val:.3f}" if not np.isnan(dsr_val) else "N/A",
+            f"{degrad_mean:.2f}" if not np.isnan(degrad_mean) else "N/A",
             f"{sign_flip:.1%}" if not np.isnan(sign_flip) else "N/A",
             f"KS={sd_result.get('ks_statistic', np.nan):.3f}, p={sd_result.get('p_value', np.nan):.4f}",
-            f"{plateau_frac:.4f}" if not np.isnan(plateau_frac) else "N/A (CSV mode)",
+            f"{plateau_frac:.2f}" if not np.isnan(plateau_frac) else "N/A (CSV mode)",
             _format_ci(r.get("bootstrap", {}).get("standard", {})),
             _format_ci(r.get("bootstrap", {}).get("block", {})),
         ],
         "Interpretation": [
             _pbo_label(pbo_val),
-            "Significant" if dsr_val >= 0.95 else "Not significant after multiple-testing correction",
+            _dsr_interpretation(dsr_val, r),
             f"{(1-degrad_mean)*100:.0f}% expected haircut" if not np.isnan(degrad_mean) and degrad_mean < 1 else "No decay",
             "High risk" if not np.isnan(sign_flip) and sign_flip > 0.3 else "Acceptable",
-            "Distributions differ" if sd_result.get("rejects_null") else "Cannot reject same distribution",
+            _sd_interpretation(sd_result),
             r["parameter_stability"]["classification"] if r.get("parameter_stability") else "N/A",
             "",
             "",
@@ -159,6 +181,16 @@ def render():
     # --- Haircut callout ---
     if r.get("haircut"):
         styled_card(r["haircut"], accent_color=TOKENS["accent_warning"])
+
+
+def _dsr_interpretation(dsr_val, results):
+    """Human-readable DSR interpretation including number of trials tested."""
+    n_trials = results.get("trial_matrix", pd.DataFrame()).shape[1]
+    if np.isnan(dsr_val):
+        return "N/A"
+    if dsr_val >= 0.95:
+        return "Significant"
+    return f"Not significant after multiple-testing correction (performance likely due to luck after testing {n_trials} strategies)"
 
 
 def _pbo_color(pbo):
@@ -178,7 +210,18 @@ def _pbo_label(pbo):
         return "Low overfitting risk"
     if pbo <= 0.50:
         return "Borderline"
+    if pbo > 0.90:
+        return "Catastrophic — selection is random"
     return "High overfitting risk"
+
+
+def _sd_interpretation(sd_result):
+    """Human-readable stochastic dominance interpretation."""
+    if sd_result.get("strategy_dominates") and sd_result.get("rejects_null"):
+        return "IS-best shows consistent OOS edge"
+    elif sd_result.get("rejects_null"):
+        return "No stochastic dominance — IS-best has no reliable OOS advantage"
+    return "Cannot distinguish IS-best from average strategy"
 
 
 def _format_ci(boot_result):

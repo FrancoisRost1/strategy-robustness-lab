@@ -74,6 +74,22 @@ class TestComputeDegradation:
         assert len(result["is_metrics"]) == 4
         assert len(result["oos_metrics"]) == 4
 
+    def test_negative_is_ratios_nan(self):
+        """IS ≤ 0 → degradation ratios all NaN, mean NaN."""
+        cscv = pd.DataFrame({
+            "is_best_metric": [-1.0, -0.5, -2.0],
+            "oos_metric_of_is_best": [-0.8, -0.3, -1.5],
+        })
+        result = compute_degradation(cscv)
+        assert np.all(np.isnan(result["degradation_ratios"]))
+        assert np.isnan(result["mean_degradation"])
+        assert result["n_unprofitable_is"] == 3
+
+    def test_n_unprofitable_is_key(self, sign_flip_cscv):
+        """n_unprofitable_is is present and correct (all IS > 0 → 0)."""
+        result = compute_degradation(sign_flip_cscv)
+        assert result["n_unprofitable_is"] == 0
+
 
 # ---------------------------------------------------------------------------
 # Haircut summary

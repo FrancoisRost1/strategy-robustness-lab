@@ -66,6 +66,16 @@ def render():
 
     st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
+    config = r.get("config", {})
+    tolerance = config.get("parameter_stability", {}).get("plateau_tolerance", 0.10)
+    metric_name = config.get("ranking", {}).get("metric", "sharpe")
+    styled_card(
+        f"Plateau = grid cells with {metric_name} within {tolerance:.0%} of best. "
+        f"Currently {plateau['n_plateau_cells']} of {plateau['n_total_cells']} parameter combinations "
+        f"({plateau['plateau_fraction']:.1%}) fall within this range.",
+        accent_color=TOKENS["accent_info"],
+    )
+
     # --- Heatmaps ---
     heatmaps = r.get("heatmaps", {})
     if heatmaps:

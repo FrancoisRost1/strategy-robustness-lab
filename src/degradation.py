@@ -39,13 +39,16 @@ def compute_degradation(cscv_results: pd.DataFrame) -> dict:
     is_metrics = cscv_results["is_best_metric"].values.astype(float)
     oos_metrics = cscv_results["oos_metric_of_is_best"].values.astype(float)
 
-    # Degradation ratio: OOS / IS. Guard against division by zero.
+    # Degradation ratio: OOS / IS. Only meaningful when IS > 0.
+    # Negative/negative = positive which is misleading, so exclude IS <= 0.
     with np.errstate(divide="ignore", invalid="ignore"):
         ratios = np.where(
-            (is_metrics == 0) | np.isnan(is_metrics),
+            (is_metrics <= 0) | np.isnan(is_metrics),
             np.nan,
             oos_metrics / is_metrics,
         )
+
+    n_unprofitable_is = int(np.sum(is_metrics <= 0))
 
     valid = ratios[~np.isnan(ratios)]
 
@@ -67,6 +70,7 @@ def compute_degradation(cscv_results: pd.DataFrame) -> dict:
         "median_degradation": median_deg,
         "std_degradation": std_deg,
         "sign_flip_rate": sign_flip,
+        "n_unprofitable_is": n_unprofitable_is,
         "is_metrics": is_metrics,
         "oos_metrics": oos_metrics,
     }
@@ -80,6 +84,12 @@ def haircut_summary(degradation_result: dict) -> str:
     median = degradation_result["median_degradation"]
     if np.isnan(median):
         return "Insufficient data for haircut estimate."
+
+    if median < 0 or median > 2.0:
+        return (
+            "Degradation ratio not meaningful "
+            "(many strategies have negative IS performance)."
+        )
 
     if median >= 1.0:
         return (

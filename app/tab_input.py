@@ -61,7 +61,7 @@ def render():
             for param, values in grid_config.items():
                 grid_rows.append({
                     "Parameter": param,
-                    "Values": str(values),
+                    "Values": ", ".join(str(v) for v in values),
                     "Count": len(values),
                 })
             if grid_rows:
@@ -69,6 +69,7 @@ def render():
                     pd.DataFrame(grid_rows),
                     use_container_width=True,
                     hide_index=True,
+                    column_config={"Values": st.column_config.TextColumn(width="large")},
                 )
 
         else:
@@ -98,6 +99,9 @@ def render():
             help="Must be even. C(S, S/2) combinations generated. Default 16 → 12,870.",
         )
 
+        if n_partitions < 12:
+            st.warning("S < 12 produces unstable PBO estimates. Recommend S ≥ 16 for reliable results.")
+
         styled_section_label("Bootstrap Resamples")
         n_resamples = st.slider(
             "Number of bootstrap iterations",
@@ -106,6 +110,9 @@ def render():
             value=config["bootstrap"]["n_resamples"],
             step=100,
         )
+
+        if n_resamples < 500:
+            st.warning("Fewer than 500 resamples may produce unreliable confidence intervals.")
 
         styled_section_label("Lookback")
         lookback = st.number_input(

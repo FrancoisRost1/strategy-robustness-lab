@@ -122,6 +122,19 @@ def classify(
             "scores": scores,
         }
 
+    # PBO > 0.90: catastrophic overfitting — stronger language
+    if pbo > 0.90:
+        return {
+            "verdict": "LIKELY OVERFIT",
+            "color": "RED",
+            "details": (
+                f"PBO {pbo:.2f} > 0.90. Catastrophic overfitting — "
+                "strategy selection is essentially random. "
+                "In-sample best has no reliable OOS advantage."
+            ),
+            "scores": scores,
+        }
+
     # PBO > yellow_threshold but not full OVERFIT
     return {
         "verdict": "LIKELY OVERFIT",

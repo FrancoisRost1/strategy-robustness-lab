@@ -37,16 +37,31 @@ def render():
     # KPI row
     cols = st.columns(4)
     with cols[0]:
-        styled_kpi("Mean Degradation", f"{degrad['mean_degradation']:.3f}")
+        styled_kpi("Mean Degradation", f"{degrad['mean_degradation']:.2f}")
     with cols[1]:
-        styled_kpi("Median Degradation", f"{degrad['median_degradation']:.3f}")
+        styled_kpi("Median Degradation", f"{degrad['median_degradation']:.2f}")
     with cols[2]:
-        flip_color = TOKENS["accent_danger"] if degrad["sign_flip_rate"] > 0.3 else TOKENS["accent_success"]
-        styled_kpi("Sign Flip Rate", f"{degrad['sign_flip_rate']:.1%}",
-                    delta="High risk" if degrad["sign_flip_rate"] > 0.3 else "Acceptable",
+        flip_rate = degrad["sign_flip_rate"]
+        if np.isnan(flip_rate):
+            flip_label = "N/A (no positive IS)"
+            flip_color = TOKENS["text_muted"]
+        elif flip_rate >= 1.0:
+            flip_label = "Strategy reverses direction OOS in 100% of CSCV combinations"
+            flip_color = TOKENS["accent_danger"]
+        elif flip_rate > 0.5:
+            flip_label = "Critical — reverses in majority of combinations"
+            flip_color = TOKENS["accent_danger"]
+        elif flip_rate > 0.3:
+            flip_label = "High risk"
+            flip_color = TOKENS["accent_danger"]
+        else:
+            flip_label = "Acceptable"
+            flip_color = TOKENS["accent_success"]
+        styled_kpi("Sign Flip Rate", f"{flip_rate:.1%}" if not np.isnan(flip_rate) else "N/A",
+                    delta=flip_label,
                     delta_color=flip_color)
     with cols[3]:
-        styled_kpi("Std Degradation", f"{degrad['std_degradation']:.3f}")
+        styled_kpi("Std Degradation", f"{degrad['std_degradation']:.2f}")
 
     st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
 
@@ -92,7 +107,12 @@ def render():
                     name="Regression fit",
                 ))
 
-        fig.update_layout(xaxis_title="IS Metric", yaxis_title="OOS Metric", height=380)
+        fig.update_layout(
+            title="IS Sharpe vs OOS Sharpe (45° = no degradation)",
+            xaxis_title="IS Metric",
+            yaxis_title="OOS Metric",
+            height=380,
+        )
         apply_plotly_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -117,6 +137,7 @@ def render():
             annotation_text="Sign flip",
         )
         fig.update_layout(
+            title="Degradation Ratio Distribution (OOS / IS)",
             xaxis_title="Degradation Ratio (OOS/IS)",
             yaxis_title="Count",
             height=380,

@@ -12,6 +12,8 @@
 ╚══════════════════════════════════════════════════════════════╝
 """
 
+import html
+
 import streamlit as st
 
 
@@ -536,12 +538,16 @@ def styled_kpi(label: str, value: str, delta: str = "", delta_color: str = ""):
     Usage:
         styled_kpi("Total Revenue", "$1.2M", delta="+12.5%", delta_color="#10B981")
     """
-    delta_html = ""
-    if delta:
-        dc = delta_color or TOKENS["accent_success"]
-        delta_html = f'<span style="font-family: {TOKENS["font_mono"]}; font-size: 0.8rem; color: {dc}; font-weight: 500;">{delta}</span>'
+    safe_label = html.escape(str(label))
+    safe_value = html.escape(str(value))
 
-    html = f"""
+    delta_html = ""
+    if delta and str(delta).strip():
+        dc = delta_color or TOKENS["accent_success"]
+        safe_delta = html.escape(str(delta))
+        delta_html = f'<span style="font-family: {TOKENS["font_mono"]}; font-size: 0.8rem; color: {dc}; font-weight: 500;">{safe_delta}</span>'
+
+    kpi_html = f"""
     <div style="
         background: {TOKENS["bg_surface"]};
         border: 1px solid {TOKENS["border_default"]};
@@ -558,7 +564,7 @@ def styled_kpi(label: str, value: str, delta: str = "", delta_color: str = ""):
             font-weight: 600;
             font-family: {TOKENS["font_body"]};
             margin-bottom: 0.5rem;
-        ">{label}</div>
+        ">{safe_label}</div>
         <div style="display: flex; align-items: baseline; gap: 0.75rem;">
             <span style="
                 font-family: {TOKENS["font_display"]};
@@ -566,12 +572,12 @@ def styled_kpi(label: str, value: str, delta: str = "", delta_color: str = ""):
                 font-weight: 700;
                 color: {TOKENS["text_primary"]};
                 letter-spacing: -0.02em;
-            ">{value}</span>
+            ">{safe_value}</span>
             {delta_html}
         </div>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(kpi_html, unsafe_allow_html=True)
 
 
 def styled_divider():

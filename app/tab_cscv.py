@@ -170,6 +170,8 @@ def render():
         st.plotly_chart(fig, use_container_width=True)
 
     # Combination detail table (collapsed)
+    # Reset rendering context after st.html()-based components inside columns
+    st.markdown("")
     with st.expander("Combination-Level Detail"):
         display_df = cscv[["combo_id", "is_best_trial", "is_best_metric",
                            "oos_metric_of_is_best", "oos_rank", "n_trials"]].copy()

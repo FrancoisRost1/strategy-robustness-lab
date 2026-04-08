@@ -153,10 +153,14 @@ def render():
         fig.add_vline(
             x=1.0, line_dash="dash", line_color=TOKENS["accent_success"],
             annotation_text="No degradation",
+            annotation_position="top right",
+            annotation=dict(yshift=10),
         )
         fig.add_vline(
             x=0.0, line_dash="dot", line_color=TOKENS["accent_danger"],
             annotation_text="Sign flip",
+            annotation_position="top left",
+            annotation=dict(yshift=-15),
         )
         fig.update_layout(
             title="Degradation Ratio Distribution (OOS / IS)",

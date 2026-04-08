@@ -132,8 +132,8 @@ def _run_analysis(mode, config, metric, n_partitions, n_resamples, lookback):
 
     with st.spinner("Running robustness analysis..."):
         if mode == "Synthetic (Demo)":
-            from app.app import _generate_demo_results
-            st.session_state["results"] = _generate_demo_results()
+            from app.demo import generate_demo_results
+            st.session_state["results"] = generate_demo_results()
         elif mode == "TSMOM Engine":
             results = _run_pipeline_on_connector("tsmom", config)
             st.session_state["results"] = results

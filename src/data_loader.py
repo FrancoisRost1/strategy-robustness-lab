@@ -1,0 +1,126 @@
+"""
+Data loader — yfinance fetch, CSV override, and caching.
+
+Financial rationale: consistent data sourcing is critical for reproducibility.
+This module provides a single entry point for price data, with local caching
+to avoid redundant API calls and a CSV override for user-supplied datasets.
+"""
+
+import logging
+import os
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+
+def load_prices(config: dict) -> pd.DataFrame:
+    """Load adjusted close prices for the configured universe.
+
+    Checks cache first, falls back to yfinance, with CSV override option.
+    Returns a DataFrame with DatetimeIndex and one column per ticker.
+
+    Parameters
+    ----------
+    config : dict
+        Full config. Uses data.source, data.csv_path, data.start_date,
+        data.end_date, data.cache_dir, and connector-specific universe.
+
+    Returns
+    -------
+    pd.DataFrame
+        Adjusted close prices, DatetimeIndex, columns = tickers.
+    """
+    source = config["data"].get("source", "yfinance")
+
+    if source == "csv":
+        return _load_csv_prices(config)
+    return _load_yfinance(config)
+
+
+def _load_yfinance(config: dict) -> pd.DataFrame:
+    """Fetch price data from yfinance with local parquet caching."""
+    import yfinance as yf
+
+    from datetime import timedelta
+
+    tickers = _resolve_tickers(config)
+    end = config["data"].get("end_date") or datetime.now().strftime("%Y-%m-%d")
+    start = config["data"].get("start_date")
+    if not start:
+        # Fall back to lookback_years if start_date not explicitly set
+        lookback_years = config["data"].get("lookback_years", 10)
+        end_dt = datetime.strptime(end, "%Y-%m-%d") if isinstance(end, str) else end
+        start = (end_dt - timedelta(days=int(lookback_years * 365.25))).strftime("%Y-%m-%d")
+
+    cache_dir = config["data"].get("cache_dir", "data/cache")
+
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f"prices_{'_'.join(sorted(tickers))}_{start}_{end}.parquet")
+
+    if os.path.isfile(cache_file):
+        logger.info("Loading cached prices from %s", cache_file)
+        return pd.read_parquet(cache_file)
+
+    logger.info("Downloading prices for %s from yfinance (%s to %s).",
+                tickers, start, end)
+    data = yf.download(tickers, start=start, end=end, auto_adjust=True, progress=False)
+
+    if isinstance(data.columns, pd.MultiIndex):
+        prices = data["Close"]
+    else:
+        prices = data[["Close"]]
+        prices.columns = tickers
+
+    # Clean: forward-fill gaps, drop rows still missing
+    n_before = prices.isna().sum().sum()
+    prices = prices.ffill().dropna()
+    n_dropped = n_before - prices.isna().sum().sum()
+    if n_dropped > 0:
+        logger.info("Forward-filled %d NaN price entries.", n_dropped)
+
+    prices.to_parquet(cache_file)
+    return prices
+
+
+def _load_csv_prices(config: dict) -> pd.DataFrame:
+    """Load price data from a user-supplied CSV."""
+    csv_path = config["data"].get("csv_path")
+    if not csv_path or not os.path.isfile(csv_path):
+        raise FileNotFoundError(
+            f"CSV price file not found: {csv_path}. "
+            "Set data.source='yfinance' or provide a valid csv_path."
+        )
+
+    logger.info("Loading prices from CSV: %s", csv_path)
+    prices = pd.read_csv(csv_path, index_col=0, parse_dates=True)
+    prices = prices.ffill().dropna()
+    return prices
+
+
+def compute_returns(prices: pd.DataFrame) -> pd.DataFrame:
+    """Convert price DataFrame to daily simple returns.
+
+    Simple returns = P(t)/P(t-1) - 1. First row is dropped (NaN).
+    """
+    returns = prices.pct_change().iloc[1:]
+    return returns
+
+
+def _resolve_tickers(config: dict) -> list:
+    """Extract ticker list from the active connector config."""
+    # TSMOM universe is explicit
+    tsmom = config.get("tsmom_connector", {})
+    if tsmom.get("universe"):
+        return tsmom["universe"]
+
+    # Factor engine uses a universe identifier — default to SPY for now
+    factor = config.get("factor_connector", {})
+    universe = factor.get("universe", "sp500")
+    if universe == "sp500":
+        # Representative subset for the factor engine
+        return ["SPY"]
+
+    return ["SPY"]

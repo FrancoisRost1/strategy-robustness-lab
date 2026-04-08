@@ -1,0 +1,159 @@
+# ============================================================================
+# Strategy Robustness Lab — config.yaml
+# All weights, thresholds, and assumptions live here. Never hardcode numbers.
+# ============================================================================
+
+# --- Data settings ---
+data:
+  source: "yfinance"                    # "yfinance" or "csv"
+  csv_path: null                        # path to user-supplied CSV (if source = csv)
+  lookback_years: 10                    # default lookback for built-in connectors
+  start_date: "2016-01-01"             # explicit start (overrides lookback_years if set)
+  end_date: null                        # null = today
+  cache_dir: "data/cache"
+  risk_free_rate: 0.0                   # annualized, for Sharpe computation
+
+# --- CSCV settings ---
+cscv:
+  n_partitions: 16                      # S — must be even. C(16,8) = 12,870 combinations
+  max_combinations: null                # null = use all C(S,S/2). Set integer for random sampling
+  random_seed: 42                       # for reproducibility when sampling combinations
+
+# --- Ranking metric ---
+ranking:
+  metric: "sharpe"                      # "sharpe", "sortino", "calmar", "information_ratio"
+  annualization_factor: 252             # trading days per year
+
+# --- PBO settings ---
+pbo:
+  # Traffic light thresholds
+  green_threshold: 0.25                 # PBO < this = GREEN (LIKELY ROBUST)
+  yellow_threshold: 0.50                # PBO < this = YELLOW (BORDERLINE), above = RED
+
+# --- Deflated Sharpe Ratio ---
+deflated_sharpe:
+  significance_level: 0.95             # DSR must exceed this to be considered significant
+
+# --- Stochastic dominance ---
+stochastic_dominance:
+  benchmark: "equal_weight"             # "equal_weight" (avg of all trials) or "naive"
+  significance_level: 0.05             # KS test alpha
+  test_second_order: true              # also compute 2nd-order SD
+
+# --- Bootstrap settings ---
+bootstrap:
+  n_resamples: 1000                    # number of bootstrap iterations
+  confidence_level: 0.95               # for confidence intervals
+  block_size: 21                       # trading days per block (block bootstrap)
+  random_seed: 42
+
+# --- Parameter stability ---
+parameter_stability:
+  plateau_tolerance: 0.10              # within 10% of best = "in the plateau"
+  # Plateau classification thresholds
+  stable_threshold: 0.30               # plateau_fraction > this = STABLE
+  moderate_threshold: 0.10             # plateau_fraction > this = MODERATE, below = FRAGILE
+
+# --- Verdict logic ---
+# Final traffic light combines PBO + DSR + plateau
+verdict:
+  # ROBUST requires ALL three conditions
+  robust_pbo_max: 0.25
+  robust_dsr_min: 0.95
+  robust_plateau_min: 0.30
+  # OVERFIT requires ALL three conditions
+  overfit_pbo_min: 0.50
+  overfit_dsr_max: 0.95
+  overfit_plateau_max: 0.10
+
+# --- Connector defaults (shared across built-in connectors) ---
+# Centralises magic numbers so they are configurable and documented.
+connector_defaults:
+  trading_days_per_month: 21
+  trading_days_per_quarter: 63
+  biweekly_trading_days: 10
+  ewma_halflife: 60
+  quantile_scale_factor: 0.05
+  cap_weight_dampening: 0.95
+
+# --- Built-in connector: Factor Engine (Project 3) ---
+factor_connector:
+  # Universe (same as factor-backtest-engine)
+  universe: "sp500"
+  # Parameter grid — all combinations will be tested
+  grid:
+    factor_weights:
+      - "equal"                         # equal weight across 5 factors
+      - "value_tilt"                    # 2x weight on value factor
+      - "momentum_tilt"                 # 2x weight on momentum factor
+      - "quality_tilt"                  # 2x weight on quality factor
+    lookback_months:
+      - 6
+      - 9
+      - 12
+    rebalance_freq:
+      - "monthly"
+      - "quarterly"
+    weighting:
+      - "equal_weight"
+      - "cap_weight"
+    n_quantiles:
+      - 5
+      - 10
+  # Total trials: 4 × 3 × 2 × 2 × 2 = 96
+
+# --- Built-in connector: TSMOM Engine (Project 6) ---
+tsmom_connector:
+  # Universe (same as tsmom-engine)
+  universe:
+    - "SPY"
+    - "EFA"
+    - "EEM"
+    - "IWM"
+    - "TLT"
+    - "IEF"
+    - "LQD"
+    - "GLD"
+    - "DBC"
+    - "SLV"
+    - "UUP"
+    - "FXE"
+    - "FXY"
+  # Parameter grid
+  grid:
+    momentum_lookback:                  # trading days
+      - 63
+      - 126
+      - 189
+      - 252
+    vol_target:                         # annualized
+      - 0.10
+      - 0.15
+      - 0.20
+    position_cap:                       # max per-asset weight
+      - 1.5
+      - 2.0
+      - 3.0
+    gross_cap:                          # max portfolio gross exposure
+      - 2.0
+      - 3.0
+      - 4.0
+    rebalance_freq:
+      - "monthly"
+      - "biweekly"
+  # Total trials: 4 × 3 × 3 × 3 × 2 = 216
+
+# --- Dashboard settings ---
+dashboard:
+  title: "Strategy Robustness Lab"
+  theme: "bloomberg_dark"
+  max_equity_curves_overlay: 5          # max trials to overlay in Trial Explorer
+  default_tab: 0                        # 0-indexed, Tab 1 = Strategy Input
+
+# --- Synthetic data (for testing) ---
+synthetic:
+  n_trials: 50                          # number of synthetic strategy variations
+  n_days: 2520                          # ~10 years of trading days
+  signal_strength: 0.02                 # planted daily alpha for "true" strategy
+  noise_std: 0.01                       # daily return noise
+  random_seed: 42

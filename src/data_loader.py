@@ -6,6 +6,7 @@ This module provides a single entry point for price data, with local caching
 to avoid redundant API calls and a CSV override for user-supplied datasets.
 """
 
+import glob
 import logging
 import os
 from datetime import datetime
@@ -58,11 +59,25 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
     cache_dir = config["data"].get("cache_dir", "data/cache")
 
     os.makedirs(cache_dir, exist_ok=True)
-    cache_file = os.path.join(cache_dir, f"prices_{'_'.join(sorted(tickers))}_{start}_{end}.parquet")
+    ticker_key = "_".join(sorted(tickers))
+    cache_file = os.path.join(cache_dir, f"prices_{ticker_key}_{start}_{end}.parquet")
 
     if os.path.isfile(cache_file):
         logger.info("Loading cached prices from %s", cache_file)
         return pd.read_parquet(cache_file)
+
+    # Fallback: the exact filename encodes today's date in `end`, so it drifts
+    # daily and misses shipped snapshots. Glob for any cached parquet covering
+    # this ticker set — critical on Streamlit Cloud where yfinance is usually
+    # blocked and the committed snapshot is the only data source.
+    glob_pattern = os.path.join(cache_dir, f"prices_{ticker_key}_*.parquet")
+    matches = sorted(glob.glob(glob_pattern))
+    if matches:
+        fallback = matches[-1]  # most recent by filename sort (dates are ISO)
+        logger.info(
+            "Exact cache miss; using committed snapshot %s", fallback
+        )
+        return pd.read_parquet(fallback)
 
     logger.info("Downloading prices for %s from yfinance (%s to %s).",
                 tickers, start, end)

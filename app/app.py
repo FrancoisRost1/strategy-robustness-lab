@@ -7,9 +7,17 @@ Generates synthetic demo data on first load so dashboard is never empty.
 
 import sys
 import os
+from pathlib import Path
 
-# Ensure project root is on path so src/ and app/ imports work
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Resolve project root and make it both import-visible AND the working directory,
+# so relative paths in config.yaml (data/cache/...) resolve correctly on
+# Streamlit Cloud regardless of how the app is launched. Without os.chdir, a
+# shifted CWD makes the cache lookup miss, the loader falls through to live
+# yfinance (blocked on Cloud), and downstream CSCV crashes with
+# "Not enough data: N rows for 16 partitions."
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+os.chdir(PROJECT_ROOT)
 
 import streamlit as st
 

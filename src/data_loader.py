@@ -83,6 +83,17 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
                 tickers, start, end)
     data = yf.download(tickers, start=start, end=end, auto_adjust=True, progress=False)
 
+    # yfinance on Streamlit Cloud is rate-limited/blocked: it often returns an
+    # empty or tiny DataFrame instead of raising. Fail loud and clear here so
+    # the user gets an actionable error instead of a cryptic downstream crash
+    # (e.g. "Not enough data: 4 rows for 16 partitions" from CSCV).
+    if data is None or data.empty:
+        raise RuntimeError(
+            f"yfinance returned no data for {tickers} ({start} → {end}). "
+            "On Streamlit Cloud, Yahoo typically rate-limits cloud provider IPs — "
+            f"ship a pre-cached parquet in {cache_dir}/ and the loader will pick it up."
+        )
+
     if isinstance(data.columns, pd.MultiIndex):
         prices = data["Close"]
     else:
@@ -95,6 +106,16 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
     n_dropped = n_before - prices.isna().sum().sum()
     if n_dropped > 0:
         logger.info("Forward-filled %d NaN price entries.", n_dropped)
+
+    # Second sanity check: even if the frame isn't empty, a handful of rows
+    # can't support a 10-year backtest or 16-partition CSCV.
+    min_rows = config["cscv"].get("n_partitions", 16) * 4
+    if len(prices) < min_rows:
+        raise RuntimeError(
+            f"yfinance returned only {len(prices)} usable rows for {tickers} "
+            f"(need ≥ {min_rows}). Likely rate-limited — ship a pre-cached "
+            f"parquet in {cache_dir}/."
+        )
 
     prices.to_parquet(cache_file)
     return prices

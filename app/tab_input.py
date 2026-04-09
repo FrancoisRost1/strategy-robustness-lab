@@ -137,26 +137,84 @@ def _run_analysis(mode, config, metric, n_partitions, n_resamples, lookback):
     config["bootstrap"]["n_resamples"] = n_resamples
     config["data"]["lookback_years"] = lookback
 
-    with st.spinner("Running robustness analysis..."):
-        if mode == "Synthetic (Demo)":
-            from app.demo import generate_demo_results
-            st.session_state["results"] = generate_demo_results()
-        elif mode == "TSMOM Engine":
-            results = _run_pipeline_on_connector("tsmom", config)
-            st.session_state["results"] = results
-        elif mode == "Factor Engine":
-            results = _run_pipeline_on_connector("factor", config)
-            st.session_state["results"] = results
-        elif mode == "CSV Upload":
-            csv_file = st.session_state.get("_csv_upload_file")
-            if csv_file is None:
-                st.error("Please upload a CSV file first.")
-                return
-            results = _run_pipeline_on_csv(csv_file, config)
-            st.session_state["results"] = results
+    try:
+        with st.spinner("Running robustness analysis..."):
+            if mode == "Synthetic (Demo)":
+                from app.demo import generate_demo_results
+                st.session_state["results"] = generate_demo_results()
+            elif mode == "TSMOM Engine":
+                results = _run_pipeline_on_connector("tsmom", config)
+                st.session_state["results"] = results
+            elif mode == "Factor Engine":
+                results = _run_pipeline_on_connector("factor", config)
+                st.session_state["results"] = results
+            elif mode == "CSV Upload":
+                csv_file = st.session_state.get("_csv_upload_file")
+                if csv_file is None:
+                    st.error("Please upload a CSV file first.")
+                    return
+                results = _run_pipeline_on_csv(csv_file, config)
+                st.session_state["results"] = results
+    except Exception as exc:
+        _render_diagnostics(exc, config)
+        return
 
     st.success("Analysis complete. Switch to other tabs to view results.")
     st.rerun()
+
+
+def _render_diagnostics(exc: Exception, config: dict) -> None:
+    """Dump enough context to diagnose Cloud failures without Manage-app access.
+
+    Streamlit Cloud redacts the raw traceback, so we surface the data-loader
+    state (CWD, cache dir, actual files on disk, prices shape) directly in
+    the UI the next time the pipeline fails.
+    """
+    import os
+    import glob
+    import traceback
+
+    st.error(f"Pipeline failed: {type(exc).__name__}: {exc}")
+
+    with st.expander("Diagnostics (expand to debug)", expanded=True):
+        cache_dir = config["data"].get("cache_dir", "data/cache")
+        st.code(
+            f"CWD:              {os.getcwd()}\n"
+            f"cache_dir (raw):  {cache_dir}\n"
+            f"cache_dir (abs):  {os.path.abspath(cache_dir)}\n"
+            f"cache_dir exists: {os.path.isdir(cache_dir)}\n"
+            f"Python version:   {os.sys.version.split()[0]}"
+        )
+
+        if os.path.isdir(cache_dir):
+            files = sorted(glob.glob(os.path.join(cache_dir, "*")))
+            st.write(f"**Files in {cache_dir}:**")
+            if files:
+                for f in files:
+                    size = os.path.getsize(f)
+                    st.code(f"  {os.path.basename(f)}  ({size:,} bytes)")
+            else:
+                st.code("  (empty)")
+
+        # Try to directly load prices so we can see what the data_loader sees
+        try:
+            from src.data_loader import load_prices, compute_returns
+            prices = load_prices(config)
+            st.write(
+                f"**load_prices() succeeded:** shape={prices.shape}, "
+                f"columns={list(prices.columns)[:5]}{'...' if len(prices.columns) > 5 else ''}, "
+                f"NaN count={int(prices.isna().sum().sum())}"
+            )
+            returns = compute_returns(prices)
+            st.write(
+                f"**compute_returns():** shape={returns.shape}, "
+                f"NaN count={int(returns.isna().sum().sum())}"
+            )
+        except Exception as load_exc:
+            st.error(f"load_prices() itself failed: {type(load_exc).__name__}: {load_exc}")
+
+        st.write("**Full traceback:**")
+        st.code("".join(traceback.format_exception(type(exc), exc, exc.__traceback__)))
 
 
 def _run_pipeline_on_connector(connector_mode: str, config: dict) -> dict:

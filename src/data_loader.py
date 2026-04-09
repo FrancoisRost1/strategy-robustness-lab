@@ -10,6 +10,7 @@ import glob
 import logging
 import os
 from datetime import datetime
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -41,6 +42,32 @@ def load_prices(config: dict) -> pd.DataFrame:
     return _load_yfinance(config)
 
 
+def _read_valid_cache(path: str, tickers: list, min_rows: int = 100) -> Optional[pd.DataFrame]:
+    """Read a parquet cache file and validate it has real data.
+
+    Returns the DataFrame if it looks valid (enough rows, expected columns),
+    otherwise None. Never raises — the caller decides how to handle a miss.
+
+    A valid snapshot for 13 tickers × 10 years is ~2500 rows; anything with
+    fewer than `min_rows` is almost certainly a stub left behind by a
+    rate-limited yfinance call and should be treated as a cache miss.
+    """
+    if not os.path.isfile(path):
+        return None
+    try:
+        df = pd.read_parquet(path)
+    except Exception as exc:
+        logger.warning("Failed to read cache file %s: %s", path, exc)
+        return None
+    if len(df) < min_rows:
+        return None
+    # Require every expected ticker to be present; extras are OK.
+    if not set(tickers).issubset(set(df.columns)):
+        return None
+    # Keep only the requested tickers, in the requested order.
+    return df[tickers]
+
+
 def _load_yfinance(config: dict) -> pd.DataFrame:
     """Fetch price data from yfinance with local parquet caching."""
     import yfinance as yf
@@ -62,22 +89,52 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
     ticker_key = "_".join(sorted(tickers))
     cache_file = os.path.join(cache_dir, f"prices_{ticker_key}_{start}_{end}.parquet")
 
+    # Try the exact cache file first, but validate the contents. A prior
+    # rate-limited yfinance run on Cloud can leave a 6KB stub parquet with
+    # zero rows at this exact path; Streamlit Cloud's container filesystem
+    # persists between hot-reloads, so that stub will poison every future
+    # request unless we detect and delete it.
+    cached = _read_valid_cache(cache_file, tickers)
+    if cached is not None:
+        return cached
     if os.path.isfile(cache_file):
-        logger.info("Loading cached prices from %s", cache_file)
-        return pd.read_parquet(cache_file)
+        logger.warning(
+            "Discarding corrupted/empty cache file %s", cache_file
+        )
+        try:
+            os.remove(cache_file)
+        except OSError:
+            pass
 
     # Fallback: the exact filename encodes today's date in `end`, so it drifts
     # daily and misses shipped snapshots. Glob for any cached parquet covering
     # this ticker set — critical on Streamlit Cloud where yfinance is usually
-    # blocked and the committed snapshot is the only data source.
+    # blocked and the committed snapshot is the only data source. Read every
+    # match and prefer the one with the most rows, so a small corrupt stub
+    # can't win the alphabetical-sort tiebreak against a committed snapshot.
     glob_pattern = os.path.join(cache_dir, f"prices_{ticker_key}_*.parquet")
-    matches = sorted(glob.glob(glob_pattern))
-    if matches:
-        fallback = matches[-1]  # most recent by filename sort (dates are ISO)
+    best_df = None
+    best_path = None
+    for path in glob.glob(glob_pattern):
+        df = _read_valid_cache(path, tickers)
+        if df is None:
+            # Clean up tiny/corrupt stubs so they don't keep getting re-scanned
+            if os.path.isfile(path) and os.path.getsize(path) < 20_000:
+                logger.warning("Removing stub cache file %s", path)
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+            continue
+        if best_df is None or len(df) > len(best_df):
+            best_df = df
+            best_path = path
+    if best_df is not None:
         logger.info(
-            "Exact cache miss; using committed snapshot %s", fallback
+            "Exact cache miss; using committed snapshot %s (%d rows)",
+            best_path, len(best_df),
         )
-        return pd.read_parquet(fallback)
+        return best_df
 
     logger.info("Downloading prices for %s from yfinance (%s to %s).",
                 tickers, start, end)

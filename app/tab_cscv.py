@@ -21,7 +21,7 @@ def render():
     """Render the CSCV Analysis tab."""
     if "results" not in st.session_state:
         styled_card(
-            "Run analysis first — go to the INPUT tab.",
+            "Run analysis first: go to the INPUT tab.",
             accent_color=TOKENS["accent_warning"],
         )
         return

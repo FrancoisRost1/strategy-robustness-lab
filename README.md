@@ -8,7 +8,7 @@ A framework for detecting overfitting in backtested trading strategies, implemen
 
 ## What It Does
 
-When you backtest many strategy variations and pick the best, the winner's performance is biased upward — it may simply be the luckiest noise configuration. This tool answers: **"Is my best backtest actually robust, or just overfit?"**
+When you backtest many strategy variations and pick the best, the winner's performance is biased upward, it may simply be the luckiest noise configuration. This tool answers: **"Is my best backtest actually robust, or just overfit?"**
 
 It runs six diagnostic tests on any set of strategy variations:
 
@@ -27,12 +27,12 @@ The output is a **traffic light verdict**: ROBUST / LIKELY ROBUST / BORDERLINE /
 
 ## Key Features
 
-- **Built-in connectors** for Factor Engine (Project 3) and TSMOM Engine (Project 6) — sweeps parameter grids automatically
-- **Generic CSV input** — test any pre-computed trial matrix for overfitting
-- **Synthetic demo mode** — generates noise strategies with planted signal for validation
+- **Built-in connectors** for Factor Engine (Project 3) and TSMOM Engine (Project 6), sweeps parameter grids automatically
+- **Generic CSV input**, test any pre-computed trial matrix for overfitting
+- **Synthetic demo mode**, generates noise strategies with planted signal for validation
 - **136 unit tests** covering all formulas, edge cases, and the full pipeline
-- **Bloomberg dark mode dashboard** — 6-tab Streamlit app with Plotly charts
-- **All thresholds configurable** via `config.yaml` — no hardcoded numbers
+- **Bloomberg dark mode dashboard**, 6-tab Streamlit app with Plotly charts
+- **All thresholds configurable** via `config.yaml`, no hardcoded numbers
 
 ---
 
@@ -80,11 +80,11 @@ python3 -m pytest tests/ -v
 
 **Combinatorial Symmetric Cross-Validation (CSCV)** splits the time series into S contiguous blocks (default 16), then generates all C(S, S/2) = 12,870 symmetric IS/OOS partitions. For each partition, it ranks every strategy variation on the IS half, identifies the IS-best, and records that strategy's OOS rank.
 
-**Probability of Backtest Overfitting (PBO)** is the fraction of these combinations where the IS-best strategy ranks in the bottom half OOS. A PBO near 0 means the best backtest consistently performs well out-of-sample. A PBO above 0.5 means it's more likely to underperform than outperform — a strong overfitting signal.
+**Probability of Backtest Overfitting (PBO)** is the fraction of these combinations where the IS-best strategy ranks in the bottom half OOS. A PBO near 0 means the best backtest consistently performs well out-of-sample. A PBO above 0.5 means it's more likely to underperform than outperform, a strong overfitting signal.
 
 **Deflated Sharpe Ratio** adjusts the best Sharpe ratio for the number of strategies tested (data snooping bias), return skewness, and kurtosis. A DSR below 0.95 means the observed Sharpe is not statistically significant after accounting for multiple testing.
 
-**Reference:** Bailey, Borwein, Lopez de Prado & Zhu (2014) — *"The Probability of Backtest Overfitting"*
+**Reference:** Bailey, Borwein, Lopez de Prado & Zhu (2014), *"The Probability of Backtest Overfitting"*
 
 ---
 
@@ -92,7 +92,7 @@ python3 -m pytest tests/ -v
 
 ```
 strategy-robustness-lab/
-├── main.py                          # CLI entry point — argparse + dispatch
+├── main.py                          # CLI entry point, argparse + dispatch
 ├── config.yaml                      # All parameters and thresholds
 ├── requirements.txt
 ├── README.md
@@ -120,12 +120,12 @@ strategy-robustness-lab/
 ├── app/
 │   ├── app.py                       # Streamlit entry point
 │   ├── style_inject.py              # Bloomberg dark mode design system
-│   ├── tab_input.py                 # Tab 1 — Strategy Input
-│   ├── tab_overview.py              # Tab 2 — Verdict & KPIs
-│   ├── tab_cscv.py                  # Tab 3 — CSCV Analysis
-│   ├── tab_degradation.py           # Tab 4 — Degradation & Bootstrap
-│   ├── tab_stability.py             # Tab 5 — Parameter Stability
-│   └── tab_explorer.py              # Tab 6 — Trial Explorer
+│   ├── tab_input.py                 # Tab 1, Strategy Input
+│   ├── tab_overview.py              # Tab 2, Verdict & KPIs
+│   ├── tab_cscv.py                  # Tab 3, CSCV Analysis
+│   ├── tab_degradation.py           # Tab 4, Degradation & Bootstrap
+│   ├── tab_stability.py             # Tab 5, Parameter Stability
+│   └── tab_explorer.py              # Tab 6, Trial Explorer
 ├── tests/                           # 136 tests across 12 test files
 ├── docs/
 │   └── analysis.md                  # Investment write-up
@@ -157,12 +157,12 @@ All parameters live in `config.yaml`. Key settings:
 ## Tech Stack
 
 - **Python 3.9+**
-- **pandas / numpy** — data manipulation
-- **scipy** — KS test, statistical functions
-- **yfinance** — market data
-- **streamlit** — dashboard
-- **plotly** — interactive charts
-- **pytest** — 136 tests
+- **pandas / numpy**, data manipulation
+- **scipy**, KS test, statistical functions
+- **yfinance**, market data
+- **streamlit**, dashboard
+- **plotly**, interactive charts
+- **pytest**, 136 tests
 
 ---
 

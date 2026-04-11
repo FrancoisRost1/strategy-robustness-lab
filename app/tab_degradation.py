@@ -41,7 +41,7 @@ def render():
 
     if unprofitable_pct > 0.7:
         styled_card(
-            "Degradation analysis unavailable — insufficient profitable in-sample strategies "
+            "Degradation analysis unavailable: insufficient profitable in-sample strategies "
             f"for meaningful comparison ({n_unprofitable}/{n_total} combinations had non-positive IS metric).",
             accent_color=TOKENS["accent_warning"],
         )
@@ -71,7 +71,7 @@ def render():
             flip_label = "Strategy reverses direction OOS in 100% of CSCV combinations"
             flip_color = TOKENS["accent_danger"]
         elif flip_rate > 0.5:
-            flip_label = "Critical — reverses in majority of combinations"
+            flip_label = "Critical: reverses in majority of combinations"
             flip_color = TOKENS["accent_danger"]
         elif flip_rate > 0.3:
             flip_label = "High risk"
@@ -194,7 +194,7 @@ def render():
 
         if (ci_lo_std < 0 < ci_hi_std) or (ci_lo_blk < 0 < ci_hi_blk):
             styled_card(
-                "Confidence interval spans zero — strategy performance is not statistically "
+                "Confidence interval spans zero: strategy performance is not statistically "
                 "distinguishable from zero return.",
                 accent_color=TOKENS["accent_warning"],
             )

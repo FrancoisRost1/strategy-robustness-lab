@@ -33,7 +33,7 @@ def render():
     max_overlay = config.get("dashboard", {}).get("max_equity_curves_overlay", 5)
 
     # --- Build performance table ---
-    styled_section_label("Performance Matrix — All Trials")
+    styled_section_label("Performance Matrix: All Trials")
 
     rows = []
     param_lookup = {str(p["trial_id"]): p for p in param_grid} if param_grid else {}
@@ -126,7 +126,7 @@ def render():
             ))
 
         fig.update_layout(
-            title="Equity Curves — Selected Trials",
+            title="Equity Curves: Selected Trials",
             xaxis_title="Date",
             yaxis_title="Cumulative Return (growth of $1)",
             height=420,

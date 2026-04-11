@@ -21,7 +21,7 @@ def render():
     """Render the Overview & Verdict tab."""
     if "results" not in st.session_state:
         styled_card(
-            "Run analysis first — go to the INPUT tab and click 'Run Analysis'.",
+            "Run analysis first: go to the INPUT tab and click 'Run Analysis'.",
             accent_color=TOKENS["accent_warning"],
         )
         return
@@ -98,7 +98,7 @@ def render():
         sd_delta = "Consistent OOS edge"
     elif sd_rejects:
         sd_text = "Differs"
-        sd_delta = "No stochastic dominance — no reliable OOS advantage"
+        sd_delta = "No stochastic dominance: no reliable OOS advantage"
     else:
         sd_text = "No difference"
         sd_delta = "Cannot distinguish IS-best from average strategy"
@@ -211,7 +211,7 @@ def _pbo_label(pbo):
     if pbo <= 0.50:
         return "Borderline"
     if pbo > 0.90:
-        return "Catastrophic — likely driven by noise rather than persistent signal"
+        return "Catastrophic: likely driven by noise rather than persistent signal"
     return "High overfitting risk"
 
 
@@ -220,7 +220,7 @@ def _sd_interpretation(sd_result):
     if sd_result.get("strategy_dominates") and sd_result.get("rejects_null"):
         return "IS-best shows consistent OOS edge"
     elif sd_result.get("rejects_null"):
-        return "No stochastic dominance — IS-best has no reliable OOS advantage"
+        return "No stochastic dominance: IS-best has no reliable OOS advantage"
     return "Cannot distinguish IS-best from average strategy"
 
 

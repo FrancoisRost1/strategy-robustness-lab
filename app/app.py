@@ -1,7 +1,7 @@
 """
-Strategy Robustness Lab — Streamlit dashboard entry point.
+Strategy Robustness Lab, Streamlit dashboard entry point.
 
-Bloomberg dark mode. 6 tabs. No business logic here — delegates to tab modules.
+Bloomberg dark mode. 6 tabs. No business logic here, delegates to tab modules.
 Generates synthetic demo data on first load so dashboard is never empty.
 """
 

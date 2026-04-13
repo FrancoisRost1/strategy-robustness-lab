@@ -1,11 +1,11 @@
 """
-CSV connector — loads an external pre-computed trial matrix.
+CSV connector, loads an external pre-computed trial matrix.
 
 Financial rationale: allows users to test any strategy for overfitting
 without needing to integrate a full connector. The CSV must have rows = dates
 (DatetimeIndex) and columns = trial/strategy variations, values = daily returns.
 
-This is the simplest input path — no parameter grid, so Tab 5 (parameter
+This is the simplest input path, no parameter grid, so Tab 5 (parameter
 stability) is unavailable in CSV mode.
 """
 
@@ -62,7 +62,7 @@ def load_trial_matrix(csv_path: str, config: dict) -> pd.DataFrame:
     # Validate: warn if values look like prices instead of returns
     if (df.abs() > 1).any().any():
         logger.warning(
-            "Some values exceed ±1 — this looks like price data, not returns. "
+            "Some values exceed ±1, this looks like price data, not returns. "
             "Ensure the CSV contains daily returns, not prices."
         )
 

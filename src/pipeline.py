@@ -1,5 +1,5 @@
 """
-Pipeline orchestration — runs the full PBO/CSCV robustness analysis.
+Pipeline orchestration, runs the full PBO/CSCV robustness analysis.
 
 Contains the core pipeline logic extracted from main.py so that main.py
 remains a thin CLI orchestrator (argparse + dispatch only).
@@ -174,7 +174,7 @@ def generate_synthetic(config: dict) -> pd.DataFrame:
     """Generate a synthetic trial matrix for testing.
 
     Creates n_trials strategies where one has a planted alpha signal
-    and the rest are pure noise — useful for validating the PBO pipeline.
+    and the rest are pure noise, useful for validating the PBO pipeline.
     """
     syn = config.get("synthetic", {})
     n_trials = syn.get("n_trials", 50)

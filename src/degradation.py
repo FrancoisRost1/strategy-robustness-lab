@@ -8,8 +8,8 @@ investors should expect to lose when moving from backtest to live trading.
 
 The degradation ratio = OOS metric / IS metric. Values near 1.0 indicate
 minimal decay; values near 0 or negative indicate the backtest is
-unreliable. The "sign flip rate" — fraction of combinations where the
-IS-best trial has negative OOS metric — is particularly damning.
+unreliable. The "sign flip rate", fraction of combinations where the
+IS-best trial has negative OOS metric, is particularly damning.
 """
 
 import numpy as np
@@ -94,7 +94,7 @@ def haircut_summary(degradation_result: dict) -> str:
     if median >= 1.0:
         return (
             f"No degradation detected (median ratio {median:.2f}). "
-            "OOS performance matches or exceeds IS — unusual, verify data."
+            "OOS performance matches or exceeds IS, unusual, verify data."
         )
 
     haircut_pct = (1 - median) * 100

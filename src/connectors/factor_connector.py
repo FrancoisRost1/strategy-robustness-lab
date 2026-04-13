@@ -1,5 +1,5 @@
 """
-Factor engine connector — generates a trial matrix by sweeping factor strategy parameters.
+Factor engine connector, generates a trial matrix by sweeping factor strategy parameters.
 
 Financial rationale: the factor-backtest-engine (Project 3) computes cross-
 sectional factor scores (Value, Momentum, Quality, Size, LowVol), ranks

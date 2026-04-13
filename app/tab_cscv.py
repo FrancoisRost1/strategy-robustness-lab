@@ -1,5 +1,5 @@
 """
-Tab 3 — CSCV Analysis.
+Tab 3, CSCV Analysis.
 
 Histogram of OOS ranks, logit distribution, PBO convergence, IS vs OOS scatter.
 """

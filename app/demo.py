@@ -1,5 +1,5 @@
 """
-Demo data generator — produces synthetic results for first-load dashboard.
+Demo data generator, produces synthetic results for first-load dashboard.
 
 Separated from app.py to avoid circular imports (app → tab_input → app).
 """

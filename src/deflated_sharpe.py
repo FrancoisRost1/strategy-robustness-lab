@@ -2,7 +2,7 @@
 Deflated Sharpe Ratio (DSR).
 
 Financial rationale: when N strategy variations are tested, the best
-Sharpe ratio is upward-biased — even random strategies will produce
+Sharpe ratio is upward-biased, even random strategies will produce
 a positive best-of-N Sharpe. The DSR adjusts for this multiple-testing
 bias by computing the probability that the observed Sharpe exceeds
 the expected maximum Sharpe under the null (all strategies are noise).
@@ -10,7 +10,7 @@ the expected maximum Sharpe under the null (all strategies are noise).
 DSR < 0.95 means the best Sharpe is not statistically significant
 after accounting for the number of trials, skewness, and kurtosis.
 
-Reference: Bailey & Lopez de Prado (2014) — "The Deflated Sharpe Ratio."
+Reference: Bailey & Lopez de Prado (2014), "The Deflated Sharpe Ratio."
 """
 
 import numpy as np
@@ -71,11 +71,11 @@ def deflated_sharpe_ratio(
     Returns
     -------
     dict
-        - dsr: float — probability that SR* > 0
-        - sr_zero: float — expected max SR under null
-        - var_sr: float — variance of SR estimator
-        - sr_star: float — test statistic
-        - is_significant: bool — whether DSR exceeds significance level
+        - dsr: float, probability that SR* > 0
+        - sr_zero: float, expected max SR under null
+        - var_sr: float, variance of SR estimator
+        - sr_star: float, test statistic
+        - is_significant: bool, whether DSR exceeds significance level
     """
     returns = np.asarray(returns, dtype=float)
     returns = returns[~np.isnan(returns)]
@@ -90,7 +90,7 @@ def deflated_sharpe_ratio(
             "is_significant": False,
         }
 
-    # Compute DAILY Sharpe ratio from returns — keeps all inputs on the same
+    # Compute DAILY Sharpe ratio from returns, keeps all inputs on the same
     # frequency (daily) for the variance formula.  The observed_sr parameter
     # (annualised) is retained for reporting but NOT used in the z-score.
     ret_std = np.std(returns, ddof=1)
@@ -107,7 +107,7 @@ def deflated_sharpe_ratio(
     skew = float(stats.skew(returns))
     kurt = float(stats.kurtosis(returns, fisher=False))  # excess=False → raw kurtosis
 
-    # Use daily SR with daily skew/kurtosis — all same frequency
+    # Use daily SR with daily skew/kurtosis, all same frequency
     var_sr = _variance_of_sr(daily_sr, skew, kurt, t)
     if np.isnan(var_sr) or var_sr <= 0:
         return {

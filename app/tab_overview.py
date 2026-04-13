@@ -1,5 +1,5 @@
 """
-Tab 2 — Overview & Verdict.
+Tab 2, Overview & Verdict.
 
 Traffic light verdict, KPI cards, and summary diagnostic table.
 """

@@ -1,5 +1,5 @@
 """
-Parameter grid engine — generates all parameter combinations and orchestrates sweeps.
+Parameter grid engine, generates all parameter combinations and orchestrates sweeps.
 
 Financial rationale: to test for overfitting we need many strategy variations
 evaluated on the same data. The grid engine takes a parameter grid from
@@ -31,7 +31,7 @@ def generate_param_grid(grid_config: dict) -> List[dict]:
         Example: [{'trial_id': 0, 'lookback': 6, 'weight': 'equal'}, ...]
     """
     if not grid_config:
-        raise ValueError("Parameter grid is empty — nothing to sweep.")
+        raise ValueError("Parameter grid is empty, nothing to sweep.")
 
     param_names = sorted(grid_config.keys())
     param_values = [grid_config[name] for name in param_names]

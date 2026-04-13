@@ -1,5 +1,5 @@
 """
-Parameter stability analysis — heatmaps, sensitivity curves, plateau detection.
+Parameter stability analysis, heatmaps, sensitivity curves, plateau detection.
 
 Financial rationale: a robust strategy should perform well across a wide
 range of parameter values, not just at a single optimised point. Plateau
@@ -56,7 +56,7 @@ def plateau_detection(metric_grid: pd.DataFrame, config: dict) -> dict:
 
     plateau_fraction = (cells within tolerance of best) / total cells.
     A high fraction means performance is insensitive to parameter choice
-    — the signal is real, not an artefact of specific tuning.
+   , the signal is real, not an artefact of specific tuning.
 
     Parameters
     ----------

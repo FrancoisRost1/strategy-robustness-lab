@@ -1,5 +1,5 @@
 """
-Bootstrap inference — standard and block bootstrap.
+Bootstrap inference, standard and block bootstrap.
 
 Financial rationale: the Sharpe ratio is a point estimate. Bootstrap
 resampling generates a distribution of Sharpe ratios, yielding confidence
@@ -74,7 +74,7 @@ def block_bootstrap(
     returns: pd.Series,
     config: dict,
 ) -> dict:
-    """Block bootstrap — resamples contiguous blocks to preserve autocorrelation.
+    """Block bootstrap, resamples contiguous blocks to preserve autocorrelation.
 
     Randomly selects blocks of consecutive daily returns (with replacement)
     and concatenates them to form a pseudo-series of the same length.

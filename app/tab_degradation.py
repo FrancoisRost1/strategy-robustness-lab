@@ -1,5 +1,5 @@
 """
-Tab 4 — Degradation Analysis.
+Tab 4, Degradation Analysis.
 
 IS vs OOS scatter, degradation histogram, sign flip rate, bootstrap distributions.
 """

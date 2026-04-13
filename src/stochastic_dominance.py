@@ -4,7 +4,7 @@ Stochastic dominance tests.
 Financial rationale: a strategy that first-order stochastically dominates
 a benchmark is unambiguously preferred by all investors who prefer more
 to less. Second-order dominance (integrated CDF) adds the constraint of
-risk aversion — relevant for institutional allocators.
+risk aversion, relevant for institutional allocators.
 
 Uses the Kolmogorov-Smirnov test for first-order dominance and cumulative
 CDF integration for second-order dominance.
@@ -82,7 +82,7 @@ def second_order_dominance(
     """Test second-order stochastic dominance via integrated CDF comparison.
 
     Strategy SSD-dominates benchmark iff the integral of (F_b - F_s) >= 0
-    at every point — i.e., the cumulative area under the benchmark CDF is
+    at every point, i.e., the cumulative area under the benchmark CDF is
     always at least as large as under the strategy CDF.
 
     Relevant for risk-averse investors: SSD implies higher expected utility

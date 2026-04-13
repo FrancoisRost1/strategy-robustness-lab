@@ -1,5 +1,5 @@
 """
-TSMOM connector — generates a trial matrix by sweeping time-series momentum parameters.
+TSMOM connector, generates a trial matrix by sweeping time-series momentum parameters.
 
 Financial rationale: the tsmom-engine (Project 6) implements Moskowitz et al. (2012)
 cross-asset time-series momentum. Signal = sign(past return), position sized
@@ -7,7 +7,7 @@ by inverse vol targeting. By varying lookback, vol target, position/gross caps,
 and rebalance frequency, we produce diverse strategy variations to stress-test
 for overfitting via CSCV/PBO.
 
-Signal timing: signal at close(t), trade at close(t+1) — strict no-lookahead.
+Signal timing: signal at close(t), trade at close(t+1), strict no-lookahead.
 """
 
 import logging

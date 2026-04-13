@@ -1,5 +1,5 @@
 """
-Tab 6 — Trial Explorer.
+Tab 6, Trial Explorer.
 
 Full performance matrix, equity curves, parameter values, export.
 """

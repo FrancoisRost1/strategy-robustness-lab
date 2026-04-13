@@ -1,5 +1,5 @@
 """
-Tab 1 — Strategy Input.
+Tab 1, Strategy Input.
 
 Mode selector, parameter grid configuration, ranking metric, CSCV settings,
 and the Run Analysis button that triggers the full pipeline.

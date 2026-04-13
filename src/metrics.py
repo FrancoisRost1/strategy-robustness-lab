@@ -1,5 +1,5 @@
 """
-Performance metrics — Sharpe, Sortino, Calmar, CAGR, MaxDD.
+Performance metrics, Sharpe, Sortino, Calmar, CAGR, MaxDD.
 
 Financial rationale: these are the standard risk-adjusted return measures
 used by allocators to rank strategies. All computations use excess returns
@@ -37,7 +37,7 @@ def sharpe_ratio(returns: pd.Series, config: dict) -> float:
 
 
 def sortino_ratio(returns: pd.Series, config: dict) -> float:
-    """Annualised Sortino ratio — penalises only downside volatility.
+    """Annualised Sortino ratio, penalises only downside volatility.
 
     Uses downside deviation = sqrt(mean(min(0, excess)^2)) over ALL
     observations, not just the negative subset. This is the correct
@@ -55,7 +55,7 @@ def sortino_ratio(returns: pd.Series, config: dict) -> float:
 
 
 def max_drawdown(returns: pd.Series) -> float:
-    """Maximum drawdown — largest peak-to-trough decline.
+    """Maximum drawdown, largest peak-to-trough decline.
 
     Measures the worst cumulative loss an investor would have experienced.
     Returns a negative number (e.g. -0.25 for a 25% drawdown).

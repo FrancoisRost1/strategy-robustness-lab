@@ -1,5 +1,5 @@
 """
-Config loader — loads YAML configuration once and returns as dict.
+Config loader, loads YAML configuration once and returns as dict.
 
 Financial rationale: centralised configuration ensures all thresholds
 (PBO cutoffs, plateau tolerances, bootstrap parameters) are auditable

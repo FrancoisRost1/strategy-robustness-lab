@@ -1,5 +1,5 @@
 """
-Tab 5 — Parameter Stability.
+Tab 5, Parameter Stability.
 
 2D heatmaps, sensitivity curves, plateau detection overlay.
 Only available for built-in connectors (not CSV upload).

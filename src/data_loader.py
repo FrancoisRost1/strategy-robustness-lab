@@ -1,5 +1,5 @@
 """
-Data loader — yfinance fetch, CSV override, and caching.
+Data loader, yfinance fetch, CSV override, and caching.
 
 Financial rationale: consistent data sourcing is critical for reproducibility.
 This module provides a single entry point for price data, with local caching
@@ -46,7 +46,7 @@ def _read_valid_cache(path: str, tickers: list, min_rows: int = 100) -> Optional
     """Read a parquet cache file and validate it has real data.
 
     Returns the DataFrame if it looks valid (enough rows, expected columns),
-    otherwise None. Never raises — the caller decides how to handle a miss.
+    otherwise None. Never raises, the caller decides how to handle a miss.
 
     A valid snapshot for 13 tickers × 10 years is ~2500 rows; anything with
     fewer than `min_rows` is almost certainly a stub left behind by a
@@ -108,7 +108,7 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
 
     # Fallback: the exact filename encodes today's date in `end`, so it drifts
     # daily and misses shipped snapshots. Glob for any cached parquet covering
-    # this ticker set — critical on Streamlit Cloud where yfinance is usually
+    # this ticker set, critical on Streamlit Cloud where yfinance is usually
     # blocked and the committed snapshot is the only data source. Read every
     # match and prefer the one with the most rows, so a small corrupt stub
     # can't win the alphabetical-sort tiebreak against a committed snapshot.
@@ -147,7 +147,7 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
     if data is None or data.empty:
         raise RuntimeError(
             f"yfinance returned no data for {tickers} ({start} → {end}). "
-            "On Streamlit Cloud, Yahoo typically rate-limits cloud provider IPs — "
+            "On Streamlit Cloud, Yahoo typically rate-limits cloud provider IPs, "
             f"ship a pre-cached parquet in {cache_dir}/ and the loader will pick it up."
         )
 
@@ -170,7 +170,7 @@ def _load_yfinance(config: dict) -> pd.DataFrame:
     if len(prices) < min_rows:
         raise RuntimeError(
             f"yfinance returned only {len(prices)} usable rows for {tickers} "
-            f"(need ≥ {min_rows}). Likely rate-limited — ship a pre-cached "
+            f"(need ≥ {min_rows}). Likely rate-limited, ship a pre-cached "
             f"parquet in {cache_dir}/."
         )
 
@@ -209,7 +209,7 @@ def _resolve_tickers(config: dict) -> list:
     if tsmom.get("universe"):
         return tsmom["universe"]
 
-    # Factor engine uses a universe identifier — default to SPY for now
+    # Factor engine uses a universe identifier, default to SPY for now
     factor = config.get("factor_connector", {})
     universe = factor.get("universe", "sp500")
     if universe == "sp500":

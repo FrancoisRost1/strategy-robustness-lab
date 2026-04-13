@@ -4,7 +4,7 @@ Probability of Backtest Overfitting (PBO).
 Financial rationale: when researchers try many strategy variations and
 report only the best, the selected strategy's in-sample performance is
 biased upward. PBO measures the probability that the IS-best strategy
-underperforms the median OOS — a PBO near 1 means the top-ranked backtest
+underperforms the median OOS, a PBO near 1 means the top-ranked backtest
 is almost certainly overfit.
 
 The logit transformation maps relative OOS rank to (-inf, +inf), making
@@ -65,7 +65,7 @@ def compute_pbo(cscv_results: pd.DataFrame) -> dict:
 def pbo_convergence(cscv_results: pd.DataFrame, step: int = 100) -> pd.DataFrame:
     """Compute PBO as a function of number of combinations evaluated.
 
-    Useful for checking whether PBO has stabilised — if it hasn't, more
+    Useful for checking whether PBO has stabilised, if it hasn't, more
     partitions (larger S) may be needed.
 
     Parameters

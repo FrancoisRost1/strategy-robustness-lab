@@ -1,5 +1,5 @@
 """
-Traffic light verdict — final robustness classification.
+Traffic light verdict,final robustness classification.
 
 Financial rationale: individual diagnostics (PBO, DSR, plateau) each
 capture a different failure mode of overfitting. The verdict combines
@@ -46,7 +46,7 @@ def classify(
         "plateau_fraction": plateau_fraction,
     }
 
-    # Single-trial or missing PBO — cannot classify without CSCV
+    # Single-trial or missing PBO, cannot classify without CSCV
     if pbo is None or (isinstance(pbo, float) and np.isnan(pbo)):
         return {
             "verdict": "INSUFFICIENT DATA",
@@ -67,7 +67,7 @@ def classify(
     green_thresh = pbo_cfg.get("green_threshold", 0.25)
     yellow_thresh = pbo_cfg.get("yellow_threshold", 0.50)
 
-    # Handle missing plateau (CSV mode) — use neutral value
+    # Handle missing plateau (CSV mode),use neutral value
     plat = plateau_fraction if plateau_fraction is not None else 0.20
 
     # Check ROBUST: all three conditions met
@@ -76,9 +76,9 @@ def classify(
             "verdict": "ROBUST",
             "color": "GREEN",
             "details": (
-                f"PBO {pbo:.2f} — low overfitting risk\n"
-                f"DSR {dsr:.2f} — statistically significant after multiple-testing\n"
-                f"Plateau {plat:.2f} — robust to parameter choice"
+                f"PBO {pbo:.2f}, low overfitting risk\n"
+                f"DSR {dsr:.2f}, statistically significant after multiple-testing\n"
+                f"Plateau {plat:.2f}, robust to parameter choice"
             ),
             "scores": scores,
         }
@@ -89,9 +89,9 @@ def classify(
             "verdict": "OVERFIT",
             "color": "RED",
             "details": (
-                f"PBO {pbo:.2f} — {'extremely high, strong evidence of overfitting' if pbo > 0.75 else 'above threshold, likely overfit'}\n"
-                f"DSR {dsr:.2f} — {'not significant, performance likely due to noise' if dsr < 0.95 else 'significant'}\n"
-                f"Plateau {plat:.2f} — {'very low, fragile parameter sensitivity' if plat < 0.10 else 'below threshold'}"
+                f"PBO {pbo:.2f}, {'extremely high, strong evidence of overfitting' if pbo > 0.75 else 'above threshold, likely overfit'}\n"
+                f"DSR {dsr:.2f}, {'not significant, performance likely due to noise' if dsr < 0.95 else 'significant'}\n"
+                f"Plateau {plat:.2f}, {'very low, fragile parameter sensitivity' if plat < 0.10 else 'below threshold'}"
             ),
             "scores": scores,
         }
@@ -102,9 +102,9 @@ def classify(
             "verdict": "LIKELY ROBUST",
             "color": "GREEN",
             "details": (
-                f"PBO {pbo:.2f} — low overfitting risk\n"
-                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant'}\n"
-                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
+                f"PBO {pbo:.2f}, low overfitting risk\n"
+                f"DSR {dsr:.2f}, {'significant' if dsr >= 0.95 else 'not significant'}\n"
+                f"Plateau {plat:.2f}, {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
             ),
             "scores": scores,
         }
@@ -114,22 +114,22 @@ def classify(
             "verdict": "BORDERLINE",
             "color": "YELLOW",
             "details": (
-                f"PBO {pbo:.2f} — borderline overfitting risk\n"
-                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant'}\n"
-                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
+                f"PBO {pbo:.2f}, borderline overfitting risk\n"
+                f"DSR {dsr:.2f}, {'significant' if dsr >= 0.95 else 'not significant'}\n"
+                f"Plateau {plat:.2f}, {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile'}"
             ),
             "scores": scores,
         }
 
-    # PBO > 0.90: catastrophic overfitting — stronger language
+    # PBO > 0.90: catastrophic overfitting, stronger language
     if pbo > 0.90:
         return {
             "verdict": "LIKELY OVERFIT",
             "color": "RED",
             "details": (
-                f"PBO {pbo:.2f} — catastrophic, likely noise\n"
-                f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
-                f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
+                f"PBO {pbo:.2f}, catastrophic, likely noise\n"
+                f"DSR {dsr:.2f}, {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
+                f"Plateau {plat:.2f}, {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
             ),
             "scores": scores,
         }
@@ -139,9 +139,9 @@ def classify(
         "verdict": "LIKELY OVERFIT",
         "color": "RED",
         "details": (
-            f"PBO {pbo:.2f} — high overfitting risk\n"
-            f"DSR {dsr:.2f} — {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
-            f"Plateau {plat:.2f} — {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
+            f"PBO {pbo:.2f}, high overfitting risk\n"
+            f"DSR {dsr:.2f}, {'significant' if dsr >= 0.95 else 'not significant, performance likely due to noise'}\n"
+            f"Plateau {plat:.2f}, {'stable' if plat > 0.30 else 'moderate' if plat > 0.10 else 'fragile parameter sensitivity'}"
         ),
         "scores": scores,
     }

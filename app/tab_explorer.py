@@ -61,7 +61,7 @@ def render():
     # Highlight IS-best row
     st.dataframe(
         df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         height=400,
     )
@@ -133,7 +133,7 @@ def render():
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     styled_divider()
 
@@ -163,7 +163,7 @@ def render():
         })
         disc_df["Median OOS Rank"] = disc_df["Median OOS Rank"].round(1)
 
-        st.dataframe(disc_df, use_container_width=True, hide_index=True)
+        st.dataframe(disc_df, width="stretch", hide_index=True)
 
         styled_card(
             f"Full-sample IS-best: Trial {is_best} | "

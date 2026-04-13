@@ -64,7 +64,7 @@ def render():
             annotation_position="top",
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with col2:
         styled_section_label("Logit-Transformed Rank Distribution")
@@ -91,7 +91,7 @@ def render():
             height=380,
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     # Row 2: PBO convergence + IS vs OOS scatter
     col3, col4 = st.columns(2)
@@ -125,7 +125,7 @@ def render():
                 height=380,
             )
             apply_plotly_theme(fig)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         else:
             st.info("Convergence data not available.")
 
@@ -167,7 +167,7 @@ def render():
             height=380,
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     # Combination detail table (collapsed)
     # Reset rendering context after st.html()-based components inside columns
@@ -177,4 +177,4 @@ def render():
                            "oos_metric_of_is_best", "oos_rank", "n_trials"]].copy()
         display_df["is_best_metric"] = display_df["is_best_metric"].round(4)
         display_df["oos_metric_of_is_best"] = display_df["oos_metric_of_is_best"].round(4)
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.dataframe(display_df, width="stretch", hide_index=True)

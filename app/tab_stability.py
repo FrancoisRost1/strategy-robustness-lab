@@ -110,7 +110,7 @@ def render():
                     height=340,
                 )
                 apply_plotly_theme(fig)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
     styled_divider()
 
@@ -173,4 +173,4 @@ def render():
                     height=320,
                 )
                 apply_plotly_theme(fig)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")

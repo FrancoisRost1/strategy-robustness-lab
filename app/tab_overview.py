@@ -39,42 +39,25 @@ def render():
     emoji_map = {"GREEN": "●", "YELLOW": "●", "RED": "●"}
     verdict_color = color_map.get(v["color"], TOKENS["text_muted"])
 
-    st.markdown(
-        f"""
-        <div style="
-            text-align: center;
-            padding: 2rem 1rem;
-            background: {TOKENS['bg_surface']};
-            border: 1px solid {TOKENS['border_default']};
-            border-radius: {TOKENS['radius_lg']};
-            margin-bottom: 1.5rem;
-            box-shadow: {TOKENS['shadow_md']};
-        ">
-            <div style="
-                font-size: 3.5rem;
-                color: {verdict_color};
-                line-height: 1;
-                margin-bottom: 0.5rem;
-            ">{emoji_map.get(v['color'], '●')}</div>
-            <div style="
-                font-family: {TOKENS['font_display']};
-                font-size: 1.75rem;
-                font-weight: 700;
-                color: {verdict_color};
-                letter-spacing: 0.05em;
-            ">{v['verdict']}</div>
-            <div style="
-                font-size: 0.9rem;
-                color: {TOKENS['text_secondary']};
-                margin-top: 0.5rem;
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
-            ">{v['details'].replace(chr(10), '<br>')}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    details_html = v["details"].replace(chr(10), "<br>")
+    verdict_dot = emoji_map.get(v["color"], "●")
+    banner = (
+        f'<div style="text-align:center;padding:2rem 1rem;'
+        f'background:{TOKENS["bg_surface"]};'
+        f'border:1px solid {TOKENS["border_default"]};'
+        f'border-radius:{TOKENS["radius_lg"]};margin-bottom:1.5rem;'
+        f'box-shadow:{TOKENS["shadow_md"]};">'
+        f'<div style="font-size:3.5rem;color:{verdict_color};'
+        f'line-height:1;margin-bottom:0.5rem;">{verdict_dot}</div>'
+        f'<div style="font-family:{TOKENS["font_display"]};'
+        f'font-size:1.75rem;font-weight:700;color:{verdict_color};'
+        f'letter-spacing:0.05em;">{v["verdict"]}</div>'
+        f'<div style="font-size:0.9rem;color:{TOKENS["text_secondary"]};'
+        f'margin-top:0.5rem;max-width:600px;margin-left:auto;'
+        f'margin-right:auto;">{details_html}</div>'
+        f'</div>'
     )
+    st.markdown(banner, unsafe_allow_html=True)
 
     # --- All-negative warning ---
     trial_metrics = r.get("trial_metrics", {})
@@ -174,7 +157,7 @@ def render():
 
     st.dataframe(
         pd.DataFrame(summary_data),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 

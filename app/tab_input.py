@@ -67,7 +67,7 @@ def render():
             if grid_rows:
                 st.dataframe(
                     pd.DataFrame(grid_rows),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                     column_config={"Values": st.column_config.TextColumn(width="large")},
                 )
@@ -125,7 +125,7 @@ def render():
     # Run button
     st.html("<div style='height: 1rem'></div>")
 
-    if st.button("Run Analysis", type="primary", use_container_width=True):
+    if st.button("Run Analysis", type="primary", width="stretch"):
         _run_analysis(mode, config, metric, n_partitions, n_resamples, lookback)
 
 

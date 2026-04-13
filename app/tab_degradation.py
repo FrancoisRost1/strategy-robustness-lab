@@ -136,7 +136,7 @@ def render():
             height=380,
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with col2:
         styled_section_label("Degradation Ratio Distribution")
@@ -169,7 +169,7 @@ def render():
             height=380,
         )
         apply_plotly_theme(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     styled_divider()
 
@@ -241,4 +241,4 @@ def _plot_bootstrap(boot_result, title):
         height=360,
     )
     apply_plotly_theme(fig)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")

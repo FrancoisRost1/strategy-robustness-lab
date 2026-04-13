@@ -31,9 +31,9 @@ def render():
 
     # --- Traffic light verdict ---
     color_map = {
-        "GREEN": "#00CC66",
-        "YELLOW": "#FFAA00",
-        "RED": "#FF4444",
+        "GREEN": TOKENS["accent_success"],
+        "YELLOW": TOKENS["accent_warning"],
+        "RED": TOKENS["accent_danger"],
         "GRAY": TOKENS["text_muted"],
     }
     emoji_map = {"GREEN": "●", "YELLOW": "●", "RED": "●"}

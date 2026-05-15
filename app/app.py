@@ -23,7 +23,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Strategy Robustness Lab",
-    page_icon="◆",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -51,7 +51,7 @@ def main():
         st.html(
             f'<h2 style="color: {TOKENS["accent_primary"]}; '
             f'font-family: {TOKENS["font_display"]}; font-weight: 700;">'
-            f'◆ Robustness Lab</h2>'
+            f'Robustness Lab</h2>'
         )
         styled_section_label("About")
         st.html(

@@ -1,0 +1,24 @@
+# python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# data
+data/cache/
+data/raw/
+outputs/
+
+# os
+.DS_Store
+
+# secrets
+.env
+.env.local
+.env.*.local
+.streamlit/secrets.toml
+*.pem
+*.key
